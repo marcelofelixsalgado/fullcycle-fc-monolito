@@ -1,6 +1,8 @@
 import { Sequelize } from "sequelize-typescript";
-import { ProductModel } from "./product.model";
+import { ProductModelCatalog } from "./product.model";
 import ProductRepository from "./product.repository";
+import Product from "../domain/product.entity";
+import Id from "../../@shared/domain/value-object/id.value-object";
 
 describe("ProductRepository test", () => {
   let sequelize: Sequelize;
@@ -13,7 +15,7 @@ describe("ProductRepository test", () => {
       sync: { force: true },
     });
 
-    await sequelize.addModels([ProductModel]);
+    await sequelize.addModels([ProductModelCatalog]);
     await sequelize.sync();
   });
 
@@ -21,8 +23,27 @@ describe("ProductRepository test", () => {
     await sequelize.close();
   });
 
+  it("should add a product", async () => {
+    const input = new Product({
+      id: new Id("1"),
+      name: "Product 1",
+      description: "Product 1 description",
+      salesPrice: 100,
+    });
+
+    const productRepository = new ProductRepository();
+    await productRepository.add(input);
+
+    const result = await ProductModelCatalog.findOne({ where: {id: "1"} });
+
+    expect(result.id).toBe("1");
+    expect(result.name).toBe("Product 1");
+    expect(result.description).toBe("Product 1 description");
+    expect(result.salesPrice).toBe(100);
+  });
+
   it("should find a product", async () => {
-    ProductModel.create({
+    ProductModelCatalog.create({
       id: "1",
       name: "Product 1",
       description: "Product 1 description",
@@ -39,14 +60,14 @@ describe("ProductRepository test", () => {
   });
 
   it("should find all products", async () => {
-    await ProductModel.create({
+    await ProductModelCatalog.create({
       id: "1",
       name: "Product 1",
       description: "Product 1 description",
       salesPrice: 100,
     });
 
-    await ProductModel.create({
+    await ProductModelCatalog.create({
       id: "2",
       name: "Product 2",
       description: "Product 2 description",

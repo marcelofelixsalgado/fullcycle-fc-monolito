@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import StoreCatalogFacadeFactory from "../factory/facade.factory";
-import { ProductModel } from "../repository/product.model";
+import { ProductModelCatalog } from "../repository/product.model";
 
 describe("StoreCatalogFacade test", () => {
   let sequelize: Sequelize;
@@ -13,7 +13,7 @@ describe("StoreCatalogFacade test", () => {
       sync: { force: true },
     });
 
-    await sequelize.addModels([ProductModel]);
+    await sequelize.addModels([ProductModelCatalog]);
     await sequelize.sync();
   });
 
@@ -21,10 +21,30 @@ describe("StoreCatalogFacade test", () => {
     await sequelize.close();
   });
 
+  it("it should add a product", async () => {
+    const facade = StoreCatalogFacadeFactory.create();
+
+    const input = {
+      id: "1",
+      name: "Product 1",
+      description: "Product 1 description",
+      salesPrice: 100,
+    };
+
+    await facade.add(input);
+
+    const result = await ProductModelCatalog.findOne({ where: {id: "1"} });
+
+    expect(result.id).toBe("1");
+    expect(result.name).toBe("Product 1");
+    expect(result.description).toBe("Product 1 description");
+    expect(result.salesPrice).toBe(100);
+  });  
+
   it("it should find a product", async () => {
     const facade = StoreCatalogFacadeFactory.create();
 
-    await ProductModel.create({
+    await ProductModelCatalog.create({
       id: "1",
       name: "Product 1",
       description: "Product 1 description",
@@ -42,14 +62,14 @@ describe("StoreCatalogFacade test", () => {
   it("it should find all product", async () => {
     const facade = StoreCatalogFacadeFactory.create();
 
-    await ProductModel.create({
+    await ProductModelCatalog.create({
       id: "1",
       name: "Product 1",
       description: "Product 1 description",
       salesPrice: 100,
     });
 
-    await ProductModel.create({
+    await ProductModelCatalog.create({
       id: "2",
       name: "Product 2",
       description: "Product 2 description",

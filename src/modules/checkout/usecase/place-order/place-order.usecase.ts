@@ -49,10 +49,12 @@ export default class PlaceOrderUseCase implements UseCaseInterface {
     });
 
     const order = new Order({
+      id: new Id(),
       client: myClient,
       products: products,
     });
-    this._repository.addOrder(order);
+
+    await this._repository.addOrder(order);
 
     return {
       id: order.id.id,
